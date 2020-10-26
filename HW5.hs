@@ -29,16 +29,22 @@ sizeRose :: Rose a -> Int
 sizeRose (Node x cs) = 1 + length(cs)
 
 fanout :: Rose a -> Int
-fanout (Node x cs) = length(cs)
+--fanout (Node x cs) = length(cs) 
+fanout (Node _ [cs]) = 1
+fanout (Node x cs) = 1 + length(map fanout cs)
+--  maximum (map fanout cs)
 --is this the right way to approach this problem?^
 
 toRoses :: Tree a -> [Rose a]
-toRoses (Bin l x r) = [(Node x (toRoses (Bin l x r)))]
+toRoses (Bin Tip x Tip) = [(Node x [])]
+toRoses (Bin l x r) = [(Node x (toRoses (Bin r x Tip)))]
 --How to covert from Rose a to [Rose a]?
 --I am unsure that this is correct since there might be infinite recursion
 
 fromRoses :: [Rose a] -> Tree a
-fromRoses [(Node x cs)] = (Bin (fromRoses cs) x Tip )
+fromRoses [(Node x cs)] 
+                        | length(cs) == 1 = (Bin Tip x Tip)
+                        | length(cs) > 1 = (Bin (fromRoses (take 1 cs)) x (fromRoses (init cs)))
 --Only added one fromTree since two might be repetitive
 --set the right side to Tip 
 
